@@ -14,11 +14,19 @@ export default class Console extends Component {
   static propTypes = {
     promptString: PropTypes.string,
     commandHandler: PropTypes.func,
+    background: PropTypes.string,
+    fontColor: PropTypes.string,
+    width: PropTypes.number,
+    height: PropTypes.number,
   };
 
   static defaultProps = {
     promptString: ">",
     commandHandler: (cmd) => "executed",
+    background: "black",
+    fontColor: "white",
+    width: 600,
+    height: 300,
   };
 
   componentDidMount() {}
@@ -81,8 +89,7 @@ export default class Console extends Component {
       //start == end
       newCommand = command.substring(0, start) + command.substring(end + 1);
     }
-    let newSelectionStart =
-      selectionStart < staticTextLength ? staticTextLength : selectionStart;
+    let newSelectionStart = selectionStart < staticTextLength ? staticTextLength : selectionStart;
 
     this.setState({ command: newCommand }, () => {
       this.ref.current.selectionStart = this.ref.current.selectionEnd = newSelectionStart;
@@ -122,27 +129,27 @@ export default class Console extends Component {
       commandOutput = this.props.commandHandler(command);
     }
     this.setState({
-      enteredText:
-        enteredText + this.props.promptString + command + "\n" + commandOutput + "\n",
+      enteredText: enteredText + this.props.promptString + command + "\n" + commandOutput + "\n",
       command: "",
     });
   }
 
   render() {
     const { command, enteredText } = this.state;
+    const { height, width, background, fontColor } = this.props;
     return (
-      <div>
-        <textarea
-          ref={this.ref}
-          style={{
-            width: "800px",
-            height: "400px",
-          }}
-          value={enteredText + this.props.promptString + command}
-          onKeyPress={this.onKeyPress}
-          onKeyDown={this.onKeyDown}
-        />
-      </div>
+      <textarea
+        ref={this.ref}
+        style={{
+          width: width + "px",
+          height: height + "px",
+          backgroundColor: background,
+          color: fontColor,
+        }}
+        value={enteredText + this.props.promptString + command}
+        onKeyPress={this.onKeyPress}
+        onKeyDown={this.onKeyDown}
+      />
     );
   }
 }
