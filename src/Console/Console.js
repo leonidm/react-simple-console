@@ -30,16 +30,12 @@ export default class Console extends Component {
       e.preventDefault();
       const { selectionStart, selectionEnd } = e.target;
       const cmd = this.state.command;
-      let { start, end } = this.getSelectionInCommand(
-        selectionStart,
-        selectionEnd
-      );
+      let { start, end } = this.getSelectionInCommand(selectionStart, selectionEnd);
       if (end < 0) return;
       if (start < 0) start = 0;
       const newCommand = cmd.substring(0, start) + e.key + cmd.substring(end);
       this.setState({ command: newCommand }, () => {
-        this.ref.current.selectionStart = this.ref.current.selectionEnd =
-          selectionStart + 1;
+        this.ref.current.selectionStart = this.ref.current.selectionEnd = selectionStart + 1;
       });
     }
   };
@@ -48,6 +44,7 @@ export default class Console extends Component {
     console.log(e.keyCode);
     switch (e.keyCode) {
       case 8: //backspace
+        this.handleBackspaceKey(e);
         break;
       case 9: //tab
         break;
@@ -60,8 +57,7 @@ export default class Console extends Component {
   };
 
   getSelectionInCommand(selectionStart, selectionEnd) {
-    const staticTextLength =
-      this.state.enteredText.length + this.props.promptString.length;
+    const staticTextLength = this.state.enteredText.length + this.props.promptString.length;
     const start = selectionStart - staticTextLength;
     const end = selectionEnd - staticTextLength;
     return { start, end };
@@ -73,12 +69,8 @@ export default class Console extends Component {
     const { command, enteredText } = this.state;
 
     // calculate start and end in the command string
-    const staticTextLength =
-      enteredText.length + this.props.promptString.length;
-    let { start, end } = this.getSelectionInCommand(
-      selectionStart,
-      selectionEnd
-    );
+    const staticTextLength = enteredText.length + this.props.promptString.length;
+    let { start, end } = this.getSelectionInCommand(selectionStart, selectionEnd);
     if (end < 0) return;
     if (start < 0) start = 0;
 
@@ -86,10 +78,37 @@ export default class Console extends Component {
     if (end > start) {
       newCommand = command.substring(0, start) + command.substring(end);
     } else {
+      //start == end
       newCommand = command.substring(0, start) + command.substring(end + 1);
     }
     let newSelectionStart =
       selectionStart < staticTextLength ? staticTextLength : selectionStart;
+
+    this.setState({ command: newCommand }, () => {
+      this.ref.current.selectionStart = this.ref.current.selectionEnd = newSelectionStart;
+    });
+  }
+
+  handleBackspaceKey(e) {
+    e.preventDefault();
+    const { selectionStart, selectionEnd } = e.target;
+    const { command } = this.state;
+
+    // calculate start and end in the command string
+    let { start, end } = this.getSelectionInCommand(selectionStart, selectionEnd);
+    if (end < 0) return;
+    if (start < 0) start = 0;
+
+    let newCommand; // after backspace
+    if (end > start) {
+      newCommand = command.substring(0, start) + command.substring(end);
+    } else if (start > 0) {
+      //start == end
+      newCommand = command.substring(0, start - 1) + command.substring(end);
+    } else {
+      return;
+    }
+    let newSelectionStart = start < end ? selectionStart : selectionStart - 1;
 
     this.setState({ command: newCommand }, () => {
       this.ref.current.selectionStart = this.ref.current.selectionEnd = newSelectionStart;
@@ -104,12 +123,7 @@ export default class Console extends Component {
     }
     this.setState({
       enteredText:
-        enteredText +
-        this.props.promptString +
-        command +
-        "\n" +
-        commandOutput +
-        "\n",
+        enteredText + this.props.promptString + command + "\n" + commandOutput + "\n",
       command: "",
     });
   }
