@@ -154,7 +154,7 @@ export default class Console extends Component {
       commandOutput = this.props.commandHandler(command);
     }
     this.setState({
-      enteredText: enteredText + this.props.promptString + command + "\n" + commandOutput + "\n",
+      enteredText: enteredText + this.props.promptString + command + "\n" + commandOutput + "\n\n",
       command: "",
     });
   }
@@ -163,7 +163,7 @@ export default class Console extends Component {
     const { command, enteredText } = this.state;
     const { height, width, background, fontColor, promptString } = this.props;
     return (
-      <textarea
+      <textarea spellcheck="false"
         ref={this.ref}
         style={{
           width: width + "px",
