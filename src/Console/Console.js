@@ -29,7 +29,14 @@ export default class Console extends Component {
     height: 300,
   };
 
-  componentDidMount() {}
+  componentDidMount() {
+    /*this.ref.current.addEventListener("select", (x) => {
+      console.log("select", x);
+    });*/
+
+    this.ref.current.addEventListener("keyup", this.ensureValidCaretPosition.bind(this));
+    this.ref.current.addEventListener("click", this.ensureValidCaretPosition.bind(this));
+  }
 
   onKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -63,6 +70,18 @@ export default class Console extends Component {
         break;
     }
   };
+
+  ensureValidCaretPosition(e) {
+    // check if there is no selection and caret position is too small set it to minimal valid
+    const { selectionStart, selectionEnd } = e.target;
+    const noSelection = selectionEnd === selectionStart;
+    if (noSelection) {
+      const minimalValidPosition = this.state.enteredText.length + this.props.promptString.length;
+      if (selectionStart < minimalValidPosition) {
+        e.target.selectionStart = e.target.selectionEnd = minimalValidPosition;
+      }
+    }
+  }
 
   getSelectionInCommand(selectionStart, selectionEnd) {
     const staticTextLength = this.state.enteredText.length + this.props.promptString.length;
@@ -99,9 +118,10 @@ export default class Console extends Component {
   handleBackspaceKey(e) {
     e.preventDefault();
     const { selectionStart, selectionEnd } = e.target;
-    const { command } = this.state;
+    const { command, enteredText } = this.state;
 
     // calculate start and end in the command string
+    const staticTextLength = enteredText.length + this.props.promptString.length;
     let { start, end } = this.getSelectionInCommand(selectionStart, selectionEnd);
     if (end < 0) return;
     if (start < 0) start = 0;
@@ -115,7 +135,12 @@ export default class Console extends Component {
     } else {
       return;
     }
-    let newSelectionStart = start < end ? selectionStart : selectionStart - 1;
+    let newSelectionStart =
+      start < end
+        ? selectionStart < staticTextLength
+          ? staticTextLength
+          : selectionStart
+        : selectionStart - 1;
 
     this.setState({ command: newCommand }, () => {
       this.ref.current.selectionStart = this.ref.current.selectionEnd = newSelectionStart;
@@ -136,7 +161,7 @@ export default class Console extends Component {
 
   render() {
     const { command, enteredText } = this.state;
-    const { height, width, background, fontColor } = this.props;
+    const { height, width, background, fontColor, promptString } = this.props;
     return (
       <textarea
         ref={this.ref}
@@ -146,7 +171,7 @@ export default class Console extends Component {
           backgroundColor: background,
           color: fontColor,
         }}
-        value={enteredText + this.props.promptString + command}
+        value={enteredText + promptString + command}
         onKeyPress={this.onKeyPress}
         onKeyDown={this.onKeyDown}
       />
