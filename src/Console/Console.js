@@ -72,7 +72,7 @@ export default class Console extends Component {
   pasteSelectionFromClipboard() {
     const { selectionStart, selectionEnd } = this.ref.current;
     navigator.clipboard.readText().then((textFromClipboard) => {
-      textFromClipboard = textFromClipboard.replace('\r', '');
+      textFromClipboard = textFromClipboard.replace(/\r/g, '');
       const { command } = this.state;
       let { start, end } = this.getSelectionInCommand(selectionStart, selectionEnd);
       if (end < 0) return;
