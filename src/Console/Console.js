@@ -211,7 +211,7 @@ Console.propTypes = {
 
 Console.defaultProps = {
   promptString: ">",
-  commandHandler: (cmd) => "executed",
+  commandHandler: (cmd) => "Command executed.",
   background: "black",
   fontColor: "white",
   width: 600,
