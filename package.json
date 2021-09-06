@@ -1,5 +1,5 @@
 {
-  "name": "react-console-app",
+  "name": "react-simple-console",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -11,13 +11,21 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3"
+    "@testing-library/user-event": "^12.8.3",
+    "cpx": "^1.5.0",
+    "cross-env": "^7.0.3",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prebuild:lib": "rimraf lib",
+    "build:lib": "npm-run-all --parallel build:js build:css",
+    "build:css": "cpx \"./src/Console/**/*.css\" ./lib",
+    "build:js": "cross-env NODE_ENV=production babel ./src/Console --out-dir ./lib --ignore spec.js"
   },
   "eslintConfig": {
     "extends": [
