@@ -1,4 +1,4 @@
-# Simple Console React component
+# Simple Console React Component
 
 Simple Console (command window inside a page) React component allowing define custom callback for issued commands.
 
@@ -11,6 +11,8 @@ npm install react-simple-console
 ## Usage
 
 ```
+import Console from "react-simple-console"
+
 <Console
         width="450"
         height="200"
