@@ -1,14 +1,36 @@
 {
   "name": "react-simple-console",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "main": "./lib/Console.js",
+  "private": false,
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "author": {
+    "name": "Leonid Margolin",
+    "email": "leomrg861@gmail.com"
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "components",
+    "react",
+    "react-component",
+    "react-console",
+    "react-terminal"
+  ],
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
     "web-vitals": "^1.1.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.15.4",
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.4",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
