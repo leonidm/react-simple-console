@@ -72,7 +72,7 @@ export default class Console extends Component {
   pasteSelectionFromClipboard() {
     const { selectionStart, selectionEnd } = this.ref.current;
     navigator.clipboard.readText().then((textFromClipboard) => {
-      textFromClipboard = textFromClipboard.replace(/\r/g, '');
+      textFromClipboard = textFromClipboard.replace(/\r/g, "");
       const { command } = this.state;
       let { start, end } = this.getSelectionInCommand(selectionStart, selectionEnd);
       if (end < 0) return;
@@ -167,15 +167,29 @@ export default class Console extends Component {
   }
 
   handleEnterKey() {
-    const { command, enteredText } = this.state;
-    let commandOutput = "";
-    if (this.props.commandHandler) {
-      commandOutput = this.props.commandHandler(command);
+    function setCommandOutput(commandOutput) {
+      _this.setState({
+        enteredText:
+          enteredText + _this.props.promptString + command + "\n" + commandOutput + "\n\n",
+        command: "",
+      });
     }
-    this.setState({
-      enteredText: enteredText + this.props.promptString + command + "\n" + commandOutput + "\n\n",
-      command: "",
-    });
+    const { command, enteredText } = this.state;
+    const _this = this;
+    if (this.props.commandHandler) {
+      const promiseOrValue = this.props.commandHandler(command);
+      Promise.resolve(promiseOrValue)
+        .then(function (value) {
+          setCommandOutput(value);
+        })
+        .catch(function (err) {
+          setCommandOutput(err);
+        });
+    }
+  }
+
+  isPromise(v) {
+    return typeof v === "object" && typeof v.then === "function";
   }
 
   render() {

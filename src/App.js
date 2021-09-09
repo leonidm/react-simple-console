@@ -2,7 +2,13 @@ import Console from "./Console/Console";
 
 function App() {
   function commandHandler(cmd) {
-    return `Command '${cmd}' executed`;
+    //return `Command '${cmd}' executed`;
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        //resolve(`Command '${cmd}' executed asyncronously`);
+        reject(new Error('some error occured'))
+      }, 2000);
+    });
   }
 
   return (
