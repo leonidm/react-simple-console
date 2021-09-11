@@ -7,9 +7,14 @@ export default class Console extends Component {
     this.state = {
       enteredText: "",
       command: "",
+      waitingForCommandCompletion: false,
+      waitingSymbolIndex: 0,
     };
     this.ref = createRef();
+    this.waitingTimer = null;
   }
+
+  waitingSymbols = ["|", "/", "-", "\\"];
 
   componentDidMount() {
     this.ref.current.addEventListener("keyup", this.ensureValidCaretPosition.bind(this));
@@ -17,10 +22,12 @@ export default class Console extends Component {
   }
 
   onKeyPress = (e) => {
+    e.preventDefault();
+    if (this.state.waitingForCommandCompletion) return;
+
     if (e.key === "Enter") {
       this.handleEnterKey();
     } else {
-      e.preventDefault();
       const { selectionStart, selectionEnd } = e.target;
       const cmd = this.state.command;
       let { start, end } = this.getSelectionInCommand(selectionStart, selectionEnd);
@@ -34,6 +41,8 @@ export default class Console extends Component {
   };
 
   onKeyDown = (e) => {
+    if (this.state.waitingForCommandCompletion) return;
+
     switch (e.keyCode) {
       case 8: //backspace
         this.handleBackspaceKey(e);
@@ -168,44 +177,73 @@ export default class Console extends Component {
 
   handleEnterKey() {
     function setCommandOutput(commandOutput) {
+      clearInterval(_this.waitingTimer);
       _this.setState({
         enteredText:
           enteredText + _this.props.promptString + command + "\n" + commandOutput + "\n\n",
         command: "",
+        waitingForCommandCompletion: false,
+        waitingSymbolIndex: 0,
       });
     }
+
     const { command, enteredText } = this.state;
     const _this = this;
-    if (this.props.commandHandler) {
-      const promiseOrValue = this.props.commandHandler(command);
-      Promise.resolve(promiseOrValue)
-        .then(function (value) {
-          setCommandOutput(value);
-        })
-        .catch(function (err) {
-          setCommandOutput(err);
-        });
-    }
+
+    this.setState({ waitingForCommandCompletion: true }, () => {
+      if (_this.props.commandHandler) {
+        _this.waitingTimer = setInterval(() => {
+          let idx = _this.state.waitingSymbolIndex + 1;
+          if (idx >= _this.waitingSymbols.length) idx = 0;
+          _this.setState({ waitingSymbolIndex: idx }); // rotate waiting symbol
+        }, 200);
+        const promiseOrValue = _this.props.commandHandler(command);
+        Promise.resolve(promiseOrValue)
+          .then(function (value) {
+            setCommandOutput(value);
+          })
+          .catch(function (err) {
+            setCommandOutput(err);
+          });
+      }
+    });
   }
 
   isPromise(v) {
     return typeof v === "object" && typeof v.then === "function";
   }
 
+  getAllText() {
+    const { command, enteredText, waitingForCommandCompletion, waitingSymbolIndex } = this.state;
+    const { promptString } = this.props;
+
+    const waitingSymbol = this.waitingSymbols[waitingSymbolIndex];
+
+    return (
+      enteredText +
+      promptString +
+      command +
+      (waitingForCommandCompletion ? "\n" + waitingSymbol : "")
+    );
+  }
+
   render() {
-    const { command, enteredText } = this.state;
-    const { height, width, background, fontColor, promptString } = this.props;
+    const { height, width, background, fontColor } = this.props;
+    const { waitingForCommandCompletion } = this.state;
+    let style = {
+      width: width + "px",
+      height: height + "px",
+      backgroundColor: background,
+      color: fontColor,
+    };
+    if (waitingForCommandCompletion) style.caretColor = "transparent";
+
     return (
       <textarea
         spellCheck="false"
         ref={this.ref}
-        style={{
-          width: width + "px",
-          height: height + "px",
-          backgroundColor: background,
-          color: fontColor,
-        }}
-        value={enteredText + promptString + command}
+        style={style}
+        value={this.getAllText()}
         onKeyPress={this.onKeyPress}
         onKeyDown={this.onKeyDown}
         onChange={() => {}}
