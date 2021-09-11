@@ -23,4 +23,5 @@ import Console from "react-simple-console"
       />
 ```
 All parameters can be omitted. Defaults will be used.
-Parameter commandHandler should return object, simple type or promise
+
+Parameter ```commandHandler``` should return object, simple type or promise
