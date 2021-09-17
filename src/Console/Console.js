@@ -228,15 +228,8 @@ export default class Console extends Component {
   }
 
   render() {
-    const { height, width, background, fontColor } = this.props;
-    const { waitingForCommandCompletion } = this.state;
-    let style = {
-      width: width + "px",
-      height: height + "px",
-      backgroundColor: background,
-      color: fontColor,
-    };
-    if (waitingForCommandCompletion) style.caretColor = "transparent";
+    let style  = {...Console.defaultProps.style, ...this.props.style};
+    if (this.state.waitingForCommandCompletion) style.caretColor = "transparent";
 
     return (
       <textarea
@@ -255,17 +248,16 @@ export default class Console extends Component {
 Console.propTypes = {
   promptString: PropTypes.string,
   commandHandler: PropTypes.func,
-  background: PropTypes.string,
-  fontColor: PropTypes.string,
-  width: PropTypes.number,
-  height: PropTypes.number,
+  style: PropTypes.object,
 };
 
 Console.defaultProps = {
   promptString: ">",
   commandHandler: (cmd) => "Command executed.",
-  background: "black",
-  fontColor: "white",
-  width: 600,
-  height: 300,
+  style: {
+    background: "black",
+    color: "white",
+    width: "400px",
+    height: "20em"
+  },
 };

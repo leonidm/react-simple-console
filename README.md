@@ -14,10 +14,7 @@ npm install react-simple-console
 import Console from "react-simple-console"
 
 <Console
-        width="450"
-        height="200"
-        background="#11FA88"
-        fontColor="red"
+        style={{width: '500px', color: 'red', background: '#11FA88'}}
         promptString="%"
         commandHandler={(cmd) => `Command '${cmd}' executed.`}
       />
