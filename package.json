@@ -10,6 +10,10 @@
     "name": "Leonid Margolin",
     "email": "leomrg861@gmail.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leonidm/react-simple-console"
+  },
   "files": [
     "lib"
   ],
