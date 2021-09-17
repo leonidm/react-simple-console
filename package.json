@@ -10,6 +10,7 @@
     "name": "Leonid Margolin",
     "email": "leomrg861@gmail.com"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/leonidm/react-simple-console"
