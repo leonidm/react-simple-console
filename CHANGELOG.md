@@ -27,3 +27,8 @@ It is a property for CSS style.
 
 Added support for commands history.
 Auto scroll to bottom.
+
+
+## v2.3.0 - v2.4.0 (2021-09-19)
+
+### FIXES and IMPROVEMENTS
