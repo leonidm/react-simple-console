@@ -185,13 +185,18 @@ export default class Console extends Component {
     function setCommandOutput(commandOutput) {
       clearInterval(_this.waitingTimer);
       _this.history.add(command);
-      _this.setState({
-        enteredText:
-          enteredText + _this.props.promptString + command + "\n" + commandOutput + "\n\n",
-        command: "",
-        waitingForCommandCompletion: false,
-        waitingSymbolIndex: 0,
-      });
+      _this.setState(
+        {
+          enteredText:
+            enteredText + _this.props.promptString + command + "\n" + commandOutput + "\n\n",
+          command: "",
+          waitingForCommandCompletion: false,
+          waitingSymbolIndex: 0,
+        },
+        () => {
+          _this.scrollToBottom();
+        }
+      );
     }
 
     const { command, enteredText } = this.state;
@@ -228,6 +233,10 @@ export default class Console extends Component {
   setCursor = (idx) => {
     this.ref.current.selectionStart = this.ref.current.selectionEnd = idx;
   };
+
+  scrollToBottom() {
+    this.ref.current.scrollTop = this.ref.current.scrollHeight;
+  }
 
   isPromise(v) {
     return typeof v === "object" && typeof v.then === "function";
