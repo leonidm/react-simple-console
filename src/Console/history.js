@@ -18,7 +18,7 @@ class History {
   getNext() {
     if (this._history.length === 0) return null;
     this._curIdx++;
-    if (this._curIdx === this.LENGTH) this._curIdx = 0;
+    if (this._curIdx === this._history.length) this._curIdx = 0;
     return this.getCurrent();
   }
   getPrev() {
