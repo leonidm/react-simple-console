@@ -1,5 +1,6 @@
 import React, { Component, createRef } from "react";
 import PropTypes from "prop-types";
+import History from "./history";
 
 export default class Console extends Component {
   constructor(props) {
@@ -12,12 +13,12 @@ export default class Console extends Component {
     };
     this.ref = createRef();
     this.waitingTimer = null;
+    this.history = new History();
   }
 
   waitingSymbols = ["|", "/", "-", "\\"];
 
   componentDidMount() {
-    this.ref.current.addEventListener("keyup", this.ensureValidCaretPosition.bind(this));
     this.ref.current.addEventListener("click", this.ensureValidCaretPosition.bind(this));
   }
 
@@ -35,7 +36,7 @@ export default class Console extends Component {
       if (start < 0) start = 0;
       const newCommand = cmd.substring(0, start) + e.key + cmd.substring(end);
       this.setState({ command: newCommand }, () => {
-        this.ref.current.selectionStart = this.ref.current.selectionEnd = selectionStart + 1;
+        this.setCursor(selectionStart + 1);
       });
     }
   };
@@ -44,12 +45,18 @@ export default class Console extends Component {
     if (this.state.waitingForCommandCompletion) return;
 
     switch (e.keyCode) {
-      case 8: //backspace
+      case 8: // backspace
         this.handleBackspaceKey(e);
         break;
-      case 9: //tab
+      case 9: // tab
         break;
-      case 46: //delete
+      case 38: // up arrow
+        this.handleArrow(e, true);
+        break;
+      case 40: // down arrow
+        this.handleArrow(e);
+        break;
+      case 46: // delete
         this.handleDeleteKey(e);
         break;
       default:
@@ -89,8 +96,7 @@ export default class Console extends Component {
       const newCommand = command.substring(0, start) + textFromClipboard + command.substring(end);
 
       this.setState({ command: newCommand }, () => {
-        this.ref.current.selectionStart = this.ref.current.selectionEnd =
-          this.getStaticTextLength() + start + textFromClipboard.length;
+        this.setCursor(this.getStaticTextLength() + start + textFromClipboard.length);
       });
     });
   }
@@ -139,7 +145,7 @@ export default class Console extends Component {
     let newSelectionStart = selectionStart < staticTextLength ? staticTextLength : selectionStart;
 
     this.setState({ command: newCommand }, () => {
-      this.ref.current.selectionStart = this.ref.current.selectionEnd = newSelectionStart;
+      this.setCursor(newSelectionStart);
     });
   }
 
@@ -171,13 +177,14 @@ export default class Console extends Component {
         : selectionStart - 1;
 
     this.setState({ command: newCommand }, () => {
-      this.ref.current.selectionStart = this.ref.current.selectionEnd = newSelectionStart;
+      this.setCursor(newSelectionStart);
     });
   }
 
   handleEnterKey() {
     function setCommandOutput(commandOutput) {
       clearInterval(_this.waitingTimer);
+      _this.history.add(command);
       _this.setState({
         enteredText:
           enteredText + _this.props.promptString + command + "\n" + commandOutput + "\n\n",
@@ -209,6 +216,19 @@ export default class Console extends Component {
     });
   }
 
+  handleArrow(e, up) {
+    e.preventDefault();
+    const newCommand = up ? this.history.getPrev() : this.history.getNext();
+    if (newCommand === null) return;
+    this.setState({ command: newCommand }, () => {
+      this.setCursor(this.getStaticTextLength() + newCommand.length);
+    });
+  }
+
+  setCursor = (idx) => {
+    this.ref.current.selectionStart = this.ref.current.selectionEnd = idx;
+  };
+
   isPromise(v) {
     return typeof v === "object" && typeof v.then === "function";
   }
@@ -228,7 +248,7 @@ export default class Console extends Component {
   }
 
   render() {
-    let style  = {...Console.defaultProps.style, ...this.props.style};
+    let style = { ...Console.defaultProps.style, ...this.props.style };
     if (this.state.waitingForCommandCompletion) style.caretColor = "transparent";
 
     return (
@@ -258,6 +278,6 @@ Console.defaultProps = {
     background: "black",
     color: "white",
     width: "400px",
-    height: "20em"
+    height: "20em",
   },
 };

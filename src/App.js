@@ -7,7 +7,7 @@ function App() {
       setTimeout(() => {
         resolve(`Command '${cmd}' executed asyncronously`);
         //reject(new Error('some error occured'))
-      }, 2000);
+      }, 20);
     });
   }
 
